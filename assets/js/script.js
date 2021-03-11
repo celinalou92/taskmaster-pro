@@ -1,5 +1,15 @@
 var tasks = {};
 
+
+// reaudit the tasks based on a set interval 
+setInterval(function () {
+  //  loop over every element with the class listgroup 
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, (1000 * 60) * 30);
+
+
 // audit task with due date of todays date at 5pm
 var auditTask = function(taskEl) {
   // get date from task element
@@ -20,7 +30,8 @@ var auditTask = function(taskEl) {
     $(taskEl).addClass("list-group-item-danger");
   } else if (Math.abs(moment().diff(time, "days")) <= 2) {
     $(taskEl).addClass("list-group-item-warning");
-  }
+  };
+  console.log(taskEl)
 };
 
 // datepicker from Jquery UI
@@ -31,36 +42,42 @@ $("#modalDueDate").datepicker({
 // Make trash droppable 
 $("#trash").droppable({
   accept: ".card .list-group-item",
-  tolorance: "touch",
+  tolerance: "touch",
   drop: function(event, ui) {
-    console.log("drop");
+    // remove dragged element from the dom
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function(event, ui) {
-    console.log("over");
+    console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function(event, ui) {
-    console.log("out");
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 });
 
 // make the task items sortable and track drag with options
 $(".card .list-group").sortable({
+  // enable dragging across lists
   connectWith: $(".card .list-group"),
   scroll: false,
-  tolorance: "pointer",
+  tolerance: "pointer",
   helper: "clone",
-  activate: function(event) {
+  activate: function(event, ui) {
     console.log("activate", this);
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
   },
-  deactivate: function(event) {
-    console.log("deactivate", this);
+  deactivate: function(event, ui) {
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function(event) {
-    console.log("over", event.target);
+    $(event.target).addClass("dropover-active");
   },
   out: function(event) {
-    console.log("over", event.target);
+    $(event.target).removeClass("dropover-active");
   },
   update: function(event) {
     // array to store the task data in
@@ -292,5 +309,7 @@ $("#remove-tasks").on("click", function() {
 
 // load tasks for the first time
 loadTasks();
+
+
 
 
